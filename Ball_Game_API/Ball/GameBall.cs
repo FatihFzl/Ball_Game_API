@@ -1,4 +1,5 @@
 ﻿using Ball_Game_API.DTO.Socket;
+using Ball_Game_API.GameCharacters;
 
 namespace Ball_Game_API.Ball
 {
@@ -33,6 +34,29 @@ namespace Ball_Game_API.Ball
             BallPositionX += ballSpeed * directionX;
             BallPositionY += ballSpeed * directionY;
 
+            if (ballPositionY > 600)
+            {
+                if (ballPositionX >= Characters.Bar1PositionX && ballPositionX <= Characters.Bar1PositionX + 30)
+                {
+                    directionX = directionX * 0;
+                    directionY = directionY * -1;
+                    
+                }
+
+                // orta kısımlar
+                else if (ballPositionX > Characters.Bar1PositionX + 100 && ballPositionX <= Characters.Bar1PositionX + 100)
+                {
+                    directionX = directionX * 0;
+                    directionY = directionY * -1;
+                }
+
+                // sağ parça
+                else if (ballPositionX > Characters.Bar1PositionX + 30 && ballPositionX <= Characters.Bar1PositionX + 160)
+                {
+                    directionX = directionX * -1;
+                    directionY = directionY * -1;
+                }
+            }
         }
 
         public static BallMovementSocketDTO GetBallPosition()
