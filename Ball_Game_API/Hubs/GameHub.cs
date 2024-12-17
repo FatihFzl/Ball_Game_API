@@ -44,12 +44,24 @@ namespace Ball_Game_API.Hubs
 
         public async Task InitCharacters()
         {
-          var character =  _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
             await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
             await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
 
         }
-       
+
+        public async Task LeaveGame()
+        {
+            _gameCharactersManager.RemoveCharacter(Context.ConnectionId);
+            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentLeft");
+        }
+
+        public async Task ResetGame()
+        {
+            _gameCharactersManager.ResetConnections();
+            await Clients.All.SendAsync("ResetGameReciever");
+        }
+
 
         public async Task ResetRound()
         {

@@ -103,7 +103,7 @@ namespace Ball_Game_API.GameCharacters
 
         public void ResetBar()
         {
-            BarPositionX = 325;
+            BarPositionX = 500;
 
         }
     }
