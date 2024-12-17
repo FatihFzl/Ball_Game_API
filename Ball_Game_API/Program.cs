@@ -1,5 +1,6 @@
 using Ball_Game_API.Ball;
 using Ball_Game_API.Data;
+using Ball_Game_API.GameCharacters;
 using Ball_Game_API.Hubs;
 using Ball_Game_API.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebApiDatabase")));
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IScoreHistoryService, ScoreHistoryService>();
+builder.Services.AddSingleton<GameCharactersManager>();
 
 var app = builder.Build();
 

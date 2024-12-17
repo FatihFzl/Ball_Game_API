@@ -2,6 +2,8 @@
 {
     public class BarMovementSocketDTO
     {
-        public int Bar1PositionX { get; set; }
+        public int BarPositionX { get; set; }
+        public int BarPositionY { get; set; }
+    
     }
 }

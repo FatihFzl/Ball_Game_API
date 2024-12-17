@@ -7,45 +7,58 @@ namespace Ball_Game_API.Hubs
     public class GameHub : Hub
     {
 
-        public override async Task OnConnectedAsync()
-        {
-            Console.WriteLine($"Client connected: {Context.ConnectionId}");
-            await base.OnConnectedAsync();
-        }
-        public async Task Ping(string text)
-        {
+        private readonly GameCharactersManager _gameCharactersManager;
 
-            await Clients.All.SendAsync("Pong", text);
+        public GameHub(GameCharactersManager gameCharactersManager)
+        {
+            _gameCharactersManager = gameCharactersManager;
         }
 
         public async Task BallRunner()
         {
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
             GameBall.MoveBall();
+            character.CheckIfBallBounced();
             
             await Clients.All.SendAsync("BallReciever", GameBall.GetBallPosition());
 
         }
 
-        public async Task MoveCharacter1Right()
+        public async Task MoveCharacterRight()
         {
-            Characters.MoveBar1Right();
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
+            character.MoveBarRight();
 
-            await Clients.All.SendAsync("Character1Reciever", Characters.GetBar1Position());
+            await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
+            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
         }
         
-        public async Task MoveCharacter1Left()
+        public async Task MoveCharacterLeft()
         {
-            Characters.MoveBar1Left();
-            await Clients.All.SendAsync("Character1Reciever", Characters.GetBar1Position());
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
+
+            character.MoveBarLeft();
+            await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
+            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
         }
+
+        public async Task InitCharacters()
+        {
+          var character =  _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
+            await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
+            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
+
+        }
+       
 
         public async Task ResetRound()
         {
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
             GameBall.ResetBall();
-            Characters.ResetBar();
+            character.ResetBar();
 
             await Clients.All.SendAsync("BallReciever", GameBall.GetBallPosition());
-            await Clients.All.SendAsync("CharacterReciever", Characters.GetBar1Position());
+            await Clients.All.SendAsync("CharacterReciever", character.GetBarPosition());
 
         }
 
