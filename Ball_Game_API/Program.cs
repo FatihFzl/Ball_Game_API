@@ -17,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IScoreHistoryService, ScoreHistoryService>();
 builder.Services.AddSingleton<GameCharactersManager>();
+builder.Services.AddSingleton<GameRunnerBackgroundJob>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<GameRunnerBackgroundJob>());
 
 var app = builder.Build();
 

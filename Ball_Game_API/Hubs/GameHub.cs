@@ -1,37 +1,69 @@
 ﻿using Ball_Game_API.Ball;
 using Ball_Game_API.GameCharacters;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.RegularExpressions;
 namespace Ball_Game_API.Hubs
 {
     public class GameHub : Hub
     {
 
         private readonly GameCharactersManager _gameCharactersManager;
+        private readonly GameRunnerBackgroundJob _gameRunnerBackgroundJob;
 
-        public GameHub(GameCharactersManager gameCharactersManager)
+        public GameHub(GameCharactersManager gameCharactersManager, GameRunnerBackgroundJob gameRunnerBackgroundJob)
         {
             _gameCharactersManager = gameCharactersManager;
+            _gameRunnerBackgroundJob = gameRunnerBackgroundJob;
         }
 
-        public async Task BallRunner()
+        public async Task JoinGame(string userName,string groupId)
         {
-            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
+            var conCount = _gameCharactersManager.GetCharacterCount();
+
+            if(conCount >= 2)
+            {
+                await Clients.Caller.SendAsync("UnableToJoinListener");
+            };
+             
+            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId, userName);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupId);
+
+            await Clients.Group(groupId).SendAsync("JoinGameReciever", character.Username, _gameCharactersManager.GetCharacterCount());
+        }
+
+        public async Task StartGame(string groupId)
+        {
+            _gameRunnerBackgroundJob.StartJob();
+            await Clients.Group(groupId).SendAsync("StartGameReciever");
+        }
+
+        public async Task BallRunner(string groupId)
+        {
+            var characters = _gameCharactersManager.GetCharacters();
+
             GameBall.MoveBall();
-            character.CheckIfBallBounced();
+            
+            foreach(var character in characters)
+            {
+                character.CheckIfBallBounced();
+            }
+
             var ballPosition = GameBall.GetBallPosition();
 
             if(ballPosition.BallPositionY <= -5)
             {
                 //SCORE
-                await ResetRound();
+                await ResetRound(groupId);
             }
 
             if(ballPosition.BallPositionY >= 655)
             {
                 //SCORE
-                await ResetRound();
+               await ResetRound(groupId);
             }
-            await Clients.Caller.SendAsync("BallReciever",ballPosition);
+
+            await Clients.Group(groupId).SendAsync("BallReciever", GameBall.GetBallPosition());
 
         }
 
@@ -70,20 +102,29 @@ namespace Ball_Game_API.Hubs
         public async Task ResetGame()
         {
             _gameCharactersManager.ResetConnections();
+            _gameRunnerBackgroundJob.StopJob();
             await Clients.All.SendAsync("ResetGameReciever");
         }
 
 
-        public async Task ResetRound()
+        public async Task ResetRound(string groupId)
         {
-            var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
             GameBall.ResetBall();
-            character.ResetBar();
+            await Clients.Group(groupId).SendAsync("BallReciever", GameBall.GetBallPosition());
 
-            //await Clients.Caller.SendAsync("ResetRoundReciever");
-            await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
-            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
+            _gameRunnerBackgroundJob.StopJob();
 
+            await Task.Delay(3000);
+
+            _gameRunnerBackgroundJob.StartJob();
+
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            _gameCharactersManager.RemoveCharacter(Context.ConnectionId);
+
+            return base.OnDisconnectedAsync(exception);
         }
 
     }

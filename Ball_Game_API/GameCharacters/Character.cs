@@ -8,9 +8,9 @@ namespace Ball_Game_API.GameCharacters
     public class Character
     {
 
+        private string username;
         private int barPositionX = 325;
         private int barPositionY = 0;
-
         private int step = 20;
 
 
@@ -26,14 +26,18 @@ namespace Ball_Game_API.GameCharacters
             private set { barPositionY = value; }
         }
 
-        public Character(int positionY) {
+        public string Username
+        {
+            get { return username; }
+            private set { username = value; }
+        }
+
+        public Character(int positionY, string? userName) {
 
             barPositionY = positionY;
+            SetUsername(userName);
         }
         
-
-
-
         public BarMovementSocketDTO GetBarPosition()
         {
             return new BarMovementSocketDTO
@@ -43,8 +47,6 @@ namespace Ball_Game_API.GameCharacters
 
             };
         }
-
-
 
         public void MoveBarRight()
         {
@@ -83,20 +85,27 @@ namespace Ball_Game_API.GameCharacters
             {
                 GameBall.directionX = GameBall.directionX * -1;
                 GameBall.directionY = GameBall.directionY * -1;
-                GameBall.ballSpeed = 2;
+                GameBall.ballSpeed = 5;
             }
             else if (GameBall.BallPositionX > BarPositionX + 30 && GameBall.BallPositionX <= BarPositionX + 130)
             {
                 GameBall.directionX = GameBall.directionX * 1;
                 GameBall.directionY = GameBall.directionY * -1;
-                GameBall.ballSpeed = 1;
+                GameBall.ballSpeed = 3;
             }
             else if (GameBall.BallPositionX > BarPositionX + 130 && GameBall.BallPositionX <= BarPositionX + 160)
             {
                 GameBall.directionX = GameBall.directionX * -1;
                 GameBall.directionY = GameBall.directionY * -1;
-                GameBall.ballSpeed = 2;
+                GameBall.ballSpeed = 5;
             }
+        }
+
+        public void SetUsername(string? name)
+        {
+            if (name is null) return;
+
+            Username = name;
         }
 
         public void ResetBar()
