@@ -7,7 +7,7 @@ namespace Ball_Game_API.Ball
     {
        
 
-        private readonly static int ballSpeed = 2;
+        public static int ballSpeed = 1;
         public static int directionY = 1;
         public static int directionX = 1;
         private static int ballPositionX = 650;

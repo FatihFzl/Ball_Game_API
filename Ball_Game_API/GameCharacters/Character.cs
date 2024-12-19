@@ -62,14 +62,14 @@ namespace Ball_Game_API.GameCharacters
         {
             if (barPositionY== 0)
             {
-                if (GameBall.BallPositionY <= barPositionY)
+                if (GameBall.BallPositionY <= barPositionY + 20)
                 {
                     BounceBall();
                 }
             }
             else
             {
-                if (GameBall.BallPositionY >= barPositionY)
+                if (GameBall.BallPositionY >= barPositionY - 20)
                 {
                     BounceBall();
                 }
@@ -81,23 +81,21 @@ namespace Ball_Game_API.GameCharacters
         {
             if (GameBall.BallPositionX >= BarPositionX && GameBall.BallPositionX <= BarPositionX + 30)
             {
-                GameBall.directionX = GameBall.directionX * 0;
+                GameBall.directionX = GameBall.directionX * -1;
                 GameBall.directionY = GameBall.directionY * -1;
-
+                GameBall.ballSpeed = 2;
             }
-
-            // orta kısımlar
-            else if (GameBall.BallPositionX > BarPositionX + 100 && GameBall.BallPositionX <= BarPositionX + 100)
+            else if (GameBall.BallPositionX > BarPositionX + 30 && GameBall.BallPositionX <= BarPositionX + 130)
             {
-                GameBall.directionX = GameBall.directionX * 0;
+                GameBall.directionX = GameBall.directionX * 1;
                 GameBall.directionY = GameBall.directionY * -1;
+                GameBall.ballSpeed = 1;
             }
-
-            // sağ parça
-            else if (GameBall.BallPositionX > BarPositionX + 30 && GameBall.BallPositionX <= BarPositionX + 160)
+            else if (GameBall.BallPositionX > BarPositionX + 130 && GameBall.BallPositionX <= BarPositionX + 160)
             {
                 GameBall.directionX = GameBall.directionX * -1;
                 GameBall.directionY = GameBall.directionY * -1;
+                GameBall.ballSpeed = 2;
             }
         }
 

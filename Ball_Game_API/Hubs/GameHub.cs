@@ -1,7 +1,6 @@
 ﻿using Ball_Game_API.Ball;
-using Ball_Game_API.DTO.Socket;
-using Microsoft.AspNetCore.SignalR;
 using Ball_Game_API.GameCharacters;
+using Microsoft.AspNetCore.SignalR;
 namespace Ball_Game_API.Hubs
 {
     public class GameHub : Hub
@@ -19,8 +18,20 @@ namespace Ball_Game_API.Hubs
             var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
             GameBall.MoveBall();
             character.CheckIfBallBounced();
-            
-            await Clients.All.SendAsync("BallReciever", GameBall.GetBallPosition());
+            var ballPosition = GameBall.GetBallPosition();
+
+            if(ballPosition.BallPositionY <= -5)
+            {
+                //SCORE
+                await ResetRound();
+            }
+
+            if(ballPosition.BallPositionY >= 655)
+            {
+                //SCORE
+                await ResetRound();
+            }
+            await Clients.Caller.SendAsync("BallReciever",ballPosition);
 
         }
 
@@ -32,7 +43,7 @@ namespace Ball_Game_API.Hubs
             await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
             await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
         }
-        
+
         public async Task MoveCharacterLeft()
         {
             var character = _gameCharactersManager.GetOrCreateCharacter(Context.ConnectionId);
@@ -69,8 +80,9 @@ namespace Ball_Game_API.Hubs
             GameBall.ResetBall();
             character.ResetBar();
 
-            await Clients.All.SendAsync("BallReciever", GameBall.GetBallPosition());
-            await Clients.All.SendAsync("CharacterReciever", character.GetBarPosition());
+            //await Clients.Caller.SendAsync("ResetRoundReciever");
+            await Clients.Caller.SendAsync("CharacterReciever", character.GetBarPosition());
+            await Clients.AllExcept([Context.ConnectionId]).SendAsync("OpponentReciever", character.GetBarPosition());
 
         }
 
